@@ -1,0 +1,33 @@
+## TODO
+
+name: "detection_postprocessing"
+backend: "python"
+max_batch_size: 1
+input [
+    {
+        name: "detection_postprocessing_input"
+        data_type: TYPE_FP32
+        dims: [ 1, -1, -1 ]
+    },
+    {
+        name : "original_image"
+        data_type : TYPE_UINT8
+        dims: [-1]
+    },
+
+    {
+        name : "original_image_info"
+        data_type : TYPE_FP32
+        dims : [-1]
+    }
+]
+
+output [
+    {
+        name: "detection_postprocessing_output"
+        data_type: TYPE_FP32
+        dims: [ -1, -1, -1 ]
+    }
+]
+
+instance_group [{ kind: KIND_CPU }]

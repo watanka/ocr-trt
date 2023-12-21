@@ -1,0 +1,97 @@
+name : 'deepocr'
+platform: 'ensemble'
+max_batch_size : 1
+
+input [
+    {
+        name : 'input_image'
+        data_type : TYPE_UINT8
+        dims : [-1]
+    }
+]
+
+output [
+    {
+        name: 'recognized_text'
+        data_type : TYPE_STRING
+        dims : [ -1 ]
+    }
+]
+
+ensemble_scheduling {
+    step [
+        {
+            model_name : 'detection_preprocessing'
+            model_version: -1
+            input_map {
+                key : 'detection_preprocessing_input' # 해당 모델 처리에서의 텐서명
+                value : 'input_image' # 앙상블 파이프라인 내에서 텐서명
+            }
+            output_map {
+                key : 'detection_preprocessing_output'
+                value : 'preprocessed_image'
+            }
+            output_map {
+                key : 'original_image_info'
+                value : 'original_image_info'
+            }
+        },
+        {
+            model_name : 'text_detection'
+            model_version : -1
+            input_map {
+                key : 'x'
+                value : 'preprocessed_image'
+            }
+            output_map {
+                key : 'sigmoid_0.tmp_0'
+                value : 'detection_featuremap'
+            }
+        },
+        {
+            model_name : 'detection_postprocessing'
+            model_version : -1
+            input_map {
+                key : 'detection_postprocessing_input'
+                value : 'detection_featuremap'
+            }
+            input_map {
+                key : 'original_image'
+                value : 'input_image'
+            }
+            input_map {
+                key : 'original_image_info'
+                value : 'original_image_info'
+            }
+            output_map {
+                key : 'detection_postprocessing_output'
+                value : 'cropped_images'
+            }
+        },
+        {
+            model_name : 'text_recognition'
+            model_version: -1
+            input_map {
+                key : 'x'
+                value : 'cropped_images'
+            }
+            output_map {
+                key : 'softmax_5.tmp_0'
+                value : 'recognition_output'
+            }
+        },
+        {
+            model_name : 'recognition_postprocessing'
+            model_version: -1
+            input_map {
+                key : 'recognition_postprocessing_input'
+                value : 'recognition_output'
+            }
+            output_map {
+                key : 'recognition_postprocessing_output'
+                value : 'recognized_text'
+            }
+        }
+
+    ]
+}

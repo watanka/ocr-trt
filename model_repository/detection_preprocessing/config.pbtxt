@@ -1,0 +1,25 @@
+name: "detection_preprocessing"
+backend: "python"
+max_batch_size: 1
+input [
+{
+    name: "detection_preprocessing_input"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+}
+]
+
+output [
+{
+    name: "detection_preprocessing_output"
+    data_type: TYPE_FP32
+    dims: [ 3, -1, -1 ]
+},
+{
+    name : "original_image_info"
+    data_type : TYPE_FP32
+    dims : [ 4 ] # ( src_h, src_w, ratio_h, ratio_w )
+}
+]
+
+instance_group [{ kind: KIND_CPU }]
